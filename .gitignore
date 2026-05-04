@@ -15,3 +15,7 @@ node_modules/
 # Local Docker and build files
 npm-debug.log*
 .DS_Store
+
+# Allure reports and results
+allure-results/
+allure-report/

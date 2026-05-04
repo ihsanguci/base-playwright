@@ -1,9 +1,14 @@
 {
   "name": "base-playwright",
   "version": "1.0.0",
-  "description": "",
+  "description": "Playwright E2E Testing with Allure Report",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:allure": "playwright test --reporter=line,allure-playwright",
+    "allure:clear": "rm -rf allure-results allure-report",
+    "allure:open": "npx allure serve allure-results"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,6 +16,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.2.0",
+    "allure-playwright": "^3.0.0",
     "dotenv": "^17.2.3"
   }
 }

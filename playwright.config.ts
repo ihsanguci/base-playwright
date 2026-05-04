@@ -24,7 +24,10 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['html'], // Reporter bawaan
+    ['allure-playwright', { outputFolder: 'allure-results' }] // WAJIB ADA INI
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -40,7 +43,7 @@ export default defineConfig({
     {
       name: 'chromium',
       // ensure the browser opens in headed mode when running locally
-      use: { ...devices['Desktop Chrome']},
+      use: { ...devices['Desktop Chrome'] },
     },
 
     // {
