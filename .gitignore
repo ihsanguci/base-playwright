@@ -8,5 +8,10 @@ node_modules/
 /playwright/.auth/
 
 
-# Environment variables file
+# Environment variables files
 .env.local
+.env.*
+
+# Local Docker and build files
+npm-debug.log*
+.DS_Store

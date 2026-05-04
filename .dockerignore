@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log*
+.DS_Store
+.git
+playwright-report
+blob-report
+test-results
+.env*
+package-lock.json
