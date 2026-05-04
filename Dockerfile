@@ -1,36 +1,25 @@
-# Stage 1: Build
-FROM mcr.microsoft.com/playwright:v1.57.0-focal AS builder
+FROM mcr.microsoft.com/playwright:v1.57.0
 
-WORKDIR /app
-
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Stage 2: Runtime
-FROM mcr.microsoft.com/playwright:v1.57.0-focal
-
-WORKDIR /app
-
-# Copy dependencies from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-
-# Copy source code
-COPY . .
-
-# Install Playwright browsers (if not already installed)
-RUN npx playwright install --with-deps
-
-# Set environment variables
 ENV CI=true
-ENV HEADLESS=true
 ENV NODE_ENV=production
 
-# Default command to run tests
-CMD ["npx", "playwright", "test"]
+WORKDIR /app
+
+# Install dependencies (cache friendly)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source
+COPY . .
+
+# Ensure browsers & deps (safety)
+RUN npx playwright install --with-deps
+
+# Prepare directories
+RUN mkdir -p /app/allure-results /app/playwright-report /app/test-results && \
+    chown -R pwuser:pwuser /app
+
+USER pwuser
+
+# Use entrypoint instead of CMD (important for flexibility)
+ENTRYPOINT ["npx", "playwright", "test"]

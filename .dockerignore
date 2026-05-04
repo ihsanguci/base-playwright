@@ -6,4 +6,3 @@ playwright-report
 blob-report
 test-results
 .env*
-package-lock.json
