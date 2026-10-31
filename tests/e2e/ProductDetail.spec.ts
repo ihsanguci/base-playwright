@@ -1,64 +1,50 @@
-import { test, expect } from '../fixtures/globalFixtures'
+import { test, expect } from '../fixtures/globalFixtures';
+
+// Sudah login via storageState (lihat auth.setup.ts).
+test.beforeEach(async ({ productsPage }) => {
+  await productsPage.goto();
+});
 
 test.describe('Product Detail Page', { tag: '@Positive' }, () => {
-  test.beforeEach(async ({ loginPage, productsPage }) => {
-    await loginPage.goto();
-    await loginPage.login(process.env.USER_SAUCEDEMO || '', process.env.PASSWORD_SAUCEDEMO || '');
-    await expect(productsPage.pageTitle).toBeVisible();
-  });
-
   test('Open product detail page', { tag: '@TC021' }, async ({ productsPage, productDetailPage }) => {
+    const name = await productsPage.getProductName(0);
     await productsPage.clickProduct(0);
-    await productDetailPage.expectProductNameVisible();
-    await productDetailPage.expectProductPriceVisible();
+    await expect(productDetailPage.page).toHaveURL(/inventory-item\.html/);
+    await productDetailPage.expectProductName(name);
   });
 
   test('Display product information', { tag: '@TC022' }, async ({ productsPage, productDetailPage }) => {
     await productsPage.clickProduct(0);
-    await productDetailPage.expectProductNameVisible();
-    await productDetailPage.expectProductPriceVisible();
-    await productDetailPage.expectProductDescriptionVisible();
-    // await productDetailPage.expectProductImageVisible();
+    await productDetailPage.expectProductInfoVisible();
   });
 
-  test('Add product to cart from detail page', { tag: '@TC023' }, async ({ productsPage, productDetailPage }) => {
+  test('Add product to cart from detail page', { tag: '@TC023' }, async ({ productsPage, productDetailPage, checkoutPage }) => {
     await productsPage.clickProduct(0);
     const productName = await productDetailPage.getProductName();
 
     await productDetailPage.addToCart();
-    await expect(productsPage.page.locator('[data-test="shopping-cart-badge"]')).toBeVisible();
+    await productsPage.expectCartBadgeCount(1);
 
-    const badgeText = await productsPage.getCartBadgeCount();
-    expect(badgeText).toBe('1');
+    await checkoutPage.goToCart();
+    await checkoutPage.expectCartItemNames([productName]);
   });
 
   test('Back to products from detail page', { tag: '@TC024' }, async ({ productsPage, productDetailPage }) => {
     await productsPage.clickProduct(0);
-    await productDetailPage.expectProductNameVisible();
-
     await productDetailPage.backToProducts();
-    await expect(productsPage.pageTitle).toBeVisible();
+    await productsPage.expectPageDisplayed();
   });
 
   test('Open multiple product details', { tag: '@TC025' }, async ({ productsPage, productDetailPage }) => {
     const firstName = await productsPage.getProductName(0);
+    const secondName = await productsPage.getProductName(1);
+
     await productsPage.clickProduct(0);
-    await productDetailPage.expectProductNameVisible();
+    await productDetailPage.expectProductName(firstName);
 
     await productDetailPage.backToProducts();
     await productsPage.clickProduct(1);
-    await productDetailPage.expectProductNameVisible();
-
-    const secondProductName = await productDetailPage.getProductName();
-    expect(secondProductName).not.toBe(firstName);
-  });
-});
-
-test.describe('Product Detail - Add to Cart', { tag: '@Positive' }, () => {
-  test.beforeEach(async ({ loginPage, productsPage }) => {
-    await loginPage.goto();
-    await loginPage.login(process.env.USER_SAUCEDEMO || '', process.env.PASSWORD_SAUCEDEMO || '');
-    await expect(productsPage.pageTitle).toBeVisible();
+    await productDetailPage.expectProductName(secondName);
   });
 
   test('Add multiple products from detail pages', { tag: '@TC026' }, async ({ productsPage, productDetailPage }) => {
@@ -70,7 +56,6 @@ test.describe('Product Detail - Add to Cart', { tag: '@Positive' }, () => {
     await productDetailPage.addToCart();
     await productDetailPage.backToProducts();
 
-    const badgeText = await productsPage.getCartBadgeCount();
-    expect(badgeText).toBe('2');
+    await productsPage.expectCartBadgeCount(2);
   });
 });

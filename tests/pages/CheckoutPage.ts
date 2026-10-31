@@ -10,21 +10,23 @@ export class CheckoutPage {
   readonly continueButton: Locator;
   readonly finishButton: Locator;
   readonly completeMessage: Locator;
+  readonly errorMessage: Locator;
   readonly cartItems: Locator;
-  readonly removeButton: Locator;
+  readonly cartItemNames: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.cartButton = page.locator('[data-test="shopping-cart-link"]');
-    this.checkoutButton = page.locator('[data-test="checkout"]');
-    this.firstNameField = page.locator('[data-test="firstName"]');
-    this.lastNameField = page.locator('[data-test="lastName"]');
-    this.postalCodeField = page.locator('[data-test="postalCode"]');
-    this.continueButton = page.locator('[data-test="continue"]');
-    this.finishButton = page.locator('[data-test="finish"]');
-    this.completeMessage = page.locator('[data-test="complete-header"]');
-    this.cartItems = page.locator('[data-test="inventory-item"]');
-    this.removeButton = page.locator('[data-test*="remove"]');
+    this.cartButton = page.getByTestId('shopping-cart-link');
+    this.checkoutButton = page.getByTestId('checkout');
+    this.firstNameField = page.getByTestId('firstName');
+    this.lastNameField = page.getByTestId('lastName');
+    this.postalCodeField = page.getByTestId('postalCode');
+    this.continueButton = page.getByTestId('continue');
+    this.finishButton = page.getByTestId('finish');
+    this.completeMessage = page.getByTestId('complete-header');
+    this.errorMessage = page.getByTestId('error');
+    this.cartItems = page.getByTestId('inventory-item');
+    this.cartItemNames = page.getByTestId('inventory-item-name');
   }
 
   async goToCart(): Promise<void> {
@@ -57,14 +59,16 @@ export class CheckoutPage {
     await expect(this.checkoutButton).toBeVisible();
   }
 
-  async getCartItemCount(): Promise<number> {
-    return await this.cartItems.count();
+  async expectCartItemCount(count: number): Promise<void> {
+    await expect(this.cartItems).toHaveCount(count);
   }
 
-  async removeFirstItem(): Promise<void> {
-    const removeButtons = this.page.locator('[data-test*="remove"]');
-    if (await removeButtons.count() > 0) {
-      await removeButtons.first().click();
-    }
+  async expectCartItemNames(names: string[]): Promise<void> {
+    await expect(this.cartItemNames).toHaveText(names);
+  }
+
+  async expectErrorMessage(expectedResult: string): Promise<void> {
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toContainText(expectedResult);
   }
 }

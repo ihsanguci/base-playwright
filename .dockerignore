@@ -6,3 +6,6 @@ playwright-report
 blob-report
 test-results
 .env*
+allure-results
+allure-report
+playwright/.auth

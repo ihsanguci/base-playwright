@@ -6,42 +6,37 @@ export class LoginPage {
   readonly passwordField: Locator;
   readonly loginButton: Locator;
   readonly errorMessage: Locator;
-  readonly chartButton: Locator;
-  
+  readonly cartButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
-    this.usernameField = page.locator('[data-test="username"]');
-    this.passwordField = page.locator('[data-test="password"]');
-    this.loginButton = page.locator('[data-test="login-button"]')
-    this.errorMessage = page.locator('[data-test="error"]');
-    this.chartButton = page.locator('[data-test="shopping-cart-link"]');
+    this.usernameField = page.getByTestId('username');
+    this.passwordField = page.getByTestId('password');
+    this.loginButton = page.getByTestId('login-button');
+    this.errorMessage = page.getByTestId('error');
+    this.cartButton = page.getByTestId('shopping-cart-link');
   }
 
-  async goto() {
-    await this.page.goto(process.env.BASE_URL!); 
+  async goto(): Promise<void> {
+    await this.page.goto('/');
   }
 
-  async login(username: string, password: string): Promise<void>{
-    // await this.usernameField.click();
+  async login(username: string, password: string): Promise<void> {
     await this.usernameField.fill(username);
-    // await this.usernameField.press('Tab');
     await this.passwordField.fill(password);
     await this.loginButton.click();
   }
 
-  async isLoginButtonVisible(): Promise<void>{
-    await this.loginButton.isVisible();
+  async expectLoginButtonVisible(): Promise<void> {
+    await expect(this.loginButton).toBeVisible();
   }
 
-  async isErrorMessageVisible(): Promise<void>{
-    await this.errorMessage.isVisible();
-  }
-
-  async expectErrorMessage(expectedResult :string): Promise<void>{
+  async expectErrorMessage(expectedResult: string): Promise<void> {
+    await expect(this.errorMessage).toBeVisible();
     await expect(this.errorMessage).toContainText(expectedResult);
   }
 
-  async expectCartButtonVisible(): Promise<void>{
-    await expect(this.chartButton).toBeVisible();
+  async expectCartButtonVisible(): Promise<void> {
+    await expect(this.cartButton).toBeVisible();
   }
 }

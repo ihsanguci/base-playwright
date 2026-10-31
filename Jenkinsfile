@@ -39,8 +39,8 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 sh '''
-                rm -rf allure-results allure-report || true
-                mkdir -p allure-results
+                rm -rf allure-results allure-report playwright-report test-results || true
+                mkdir -p allure-results playwright-report test-results
                 '''
             }
         }
@@ -62,32 +62,27 @@ pipeline {
                         passwordVariable: 'PASSWORD_SAUCEDEMO'
                     )
                 ]) {
-                    script {
+                    // Pakai ''' (bukan """) supaya Groovy tidak menginterpolasi secret / input user.
+                    // Semua nilai dibaca shell dari env var. ENTRYPOINT image sudah "npx playwright test",
+                    // jadi di sini cukup kirim argumennya saja.
+                    sh '''
+                    set -e
+                    case "$TEST_SCOPE" in
+                      file) set -- "$TEST_VALUE" ;;
+                      tag)  set -- --grep "$TEST_VALUE" ;;
+                      *)    set -- ;;
+                    esac
 
-                        def cmd = ""
-
-                        if (params.TEST_SCOPE == 'all') {
-                            cmd = "npx playwright test"
-                        }
-
-                        if (params.TEST_SCOPE == 'file') {
-                            cmd = "npx playwright test ${params.TEST_VALUE}"
-                        }
-
-                        if (params.TEST_SCOPE == 'tag') {
-                            cmd = "npx playwright test --grep ${params.TEST_VALUE}"
-                        }
-
-                        sh """
-                        docker run --rm \
-                          -v \$(pwd)/allure-results:/app/allure-results \
-                          -e BASE_URL=${BASE_URL} \
-                          -e HEADLESS=${params.HEADLESS} \
-                          -e USER_SAUCEDEMO=$USER_SAUCEDEMO \
-                          -e PASSWORD_SAUCEDEMO=$PASSWORD_SAUCEDEMO \
-                          playwright-test ${cmd}
-                        """
-                    }
+                    docker run --rm \
+                      -v "$(pwd)/allure-results:/app/allure-results" \
+                      -v "$(pwd)/playwright-report:/app/playwright-report" \
+                      -v "$(pwd)/test-results:/app/test-results" \
+                      -e BASE_URL \
+                      -e HEADLESS \
+                      -e USER_SAUCEDEMO \
+                      -e PASSWORD_SAUCEDEMO \
+                      playwright-test "$@"
+                    '''
                 }
             }
         }
@@ -108,6 +103,8 @@ pipeline {
                 jdk: '',
                 results: [[path: 'allure-results']]
             ])
+            // HTML report + trace/screenshot/video dari test yang gagal
+            archiveArtifacts artifacts: 'playwright-report/**, test-results/**', allowEmptyArchive: true
         }
         success {
             echo 'SUCCESS ✅'

@@ -11,24 +11,20 @@ export class ProductDetailPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.productName = page.locator('[data-test="inventory-item-name"]');
-    this.productPrice = page.locator('[data-test="inventory-item-price"]');
-    this.productDescription = page.locator('[data-test="inventory-item-desc"]');
-    this.addToCartButton = page.locator('[data-test*="add-to-cart"]');
-    this.backButton = page.locator('[data-test="back-to-products"]');
-    this.productImage = page.locator('[data-test="inventory-item-img"]');
+    // Halaman list memakai data-test yang sama (inventory-item-name, dst.), jadi semua locator
+    // di-scope ke container detail. Dengan begitu locator otomatis menunggu sampai navigasi
+    // dari list ke detail selesai, bukan kena strict-mode violation di halaman list.
+    const details = page.locator('.inventory_details_container');
+    this.productName = details.getByTestId('inventory-item-name');
+    this.productPrice = details.getByTestId('inventory-item-price');
+    this.productDescription = details.getByTestId('inventory-item-desc');
+    this.addToCartButton = details.getByTestId('add-to-cart');
+    this.backButton = page.getByTestId('back-to-products');
+    this.productImage = details.locator('.inventory_details_img');
   }
 
-  async getProductName(): Promise<string | null> {
-    return await this.productName.textContent();
-  }
-
-  async getProductPrice(): Promise<string | null> {
-    return await this.productPrice.textContent();
-  }
-
-  async getProductDescription(): Promise<string | null> {
-    return await this.productDescription.textContent();
+  async getProductName(): Promise<string> {
+    return await this.productName.innerText();
   }
 
   async addToCart(): Promise<void> {
@@ -39,23 +35,14 @@ export class ProductDetailPage {
     await this.backButton.click();
   }
 
-  async expectProductNameVisible(): Promise<void> {
+  async expectProductName(name: string): Promise<void> {
+    await expect(this.productName).toHaveText(name);
+  }
+
+  async expectProductInfoVisible(): Promise<void> {
     await expect(this.productName).toBeVisible();
-  }
-
-  async expectProductPriceVisible(): Promise<void> {
     await expect(this.productPrice).toBeVisible();
-  }
-
-  async expectProductDescriptionVisible(): Promise<void> {
     await expect(this.productDescription).toBeVisible();
-  }
-
-  async expectAddToCartButtonVisible(): Promise<void> {
-    await expect(this.addToCartButton).toBeVisible();
-  }
-
-  async expectProductImageVisible(): Promise<void> {
     await expect(this.productImage).toBeVisible();
   }
 }

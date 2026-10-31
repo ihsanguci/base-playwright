@@ -4,6 +4,21 @@ Dokumentasi lengkap untuk menjalankan Playwright tests dengan berbagai kombinasi
 
 ---
 
+## ⚙️ Setup
+
+```bash
+npm ci
+npx playwright install chromium
+cp .env.example .env.local   # lalu isi USER_SAUCEDEMO & PASSWORD_SAUCEDEMO
+```
+
+- File env dipilih lewat `ENV` (default `local` → `.env.local`).
+- Login dilakukan **sekali** oleh project `setup` (`tests/auth.setup.ts`) lalu session-nya
+  (`playwright/.auth/user.json`) dipakai ulang semua test. `Login.spec.ts` sengaja mulai tanpa session.
+- Default headless. Pakai `--headed` atau `HEADLESS=false` untuk melihat browser.
+
+---
+
 ## 📋 Quick Start
 
 ```bash

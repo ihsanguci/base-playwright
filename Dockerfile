@@ -1,7 +1,8 @@
 FROM mcr.microsoft.com/playwright:v1.57.0
 
+# Jangan set NODE_ENV=production di sini: npm ci akan melewati devDependencies
+# (termasuk @playwright/test). Browser sudah tersedia di base image ini.
 ENV CI=true
-ENV NODE_ENV=production
 
 WORKDIR /app
 
@@ -12,11 +13,8 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Ensure browsers & deps (safety)
-RUN npx playwright install --with-deps
-
 # Prepare directories
-RUN mkdir -p /app/allure-results /app/playwright-report /app/test-results && \
+RUN mkdir -p /app/allure-results /app/playwright-report /app/test-results /app/playwright/.auth && \
     chown -R pwuser:pwuser /app
 
 USER pwuser
